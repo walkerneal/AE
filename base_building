@@ -1,0 +1,89 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import time
+
+### User Input ###
+email = 'walkerneal3791@gmail.com'
+password = 'Starfishes7'
+base_num = '10066'
+
+##### Structures ID's #####
+mr = 'item_metal-refineries'
+mr_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Metal Refineries']"
+sol = 'item_solar-plants'
+sol_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Solar Plants']"
+urb = 'item_urban-structures'
+urb_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Urban Structures']"
+rf = 'item_robotic-factories'
+rf_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Robotic Factories']"
+sp = 'item_spaceports'
+sp_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Spaceports']"
+sy = 'item_shipyards'
+sy_action = "//form[@action='base.aspx?base=" + base_num + "&view=structures&action=upgrade&item=Shipyards']"
+
+
+### SETTING UP SELENIUM DRIVER ###
+driver = webdriver.Chrome(executable_path=r"D:\Program Files\chromedriver_win32\chromedriver.exe")
+
+# Getting initial page
+driver.get('https://utopia.astroempires.com/base.aspx?base=' + base_num + '&view=structures')
+
+# Logging in
+elem = driver.find_element_by_name('email')
+elem.send_keys(email)
+elem = driver.find_element_by_name('pass')
+elem.send_keys(password)
+elem.send_keys(Keys.RETURN)
+
+# Transferring html to BS
+soup = BeautifulSoup(driver.page_source, 'lxml')
+
+# mr mr mr sol mr mr urb sol mr rf sp sol mr urb rf sol sp sy mr sol urb rf sp sol sy sp
+build_order = [mr, mr, mr, sol, mr, mr, urb, sol, mr, rf, sp, sol, sy, urb, mr, sol, rf, sp, sy, sol, urb, mr, rf, sol, sp, sy, mr, urb, sol, rf, sp, sy, sol, mr, urb, rf, sol, sp, sy]
+build_action = [mr_action, mr_action, mr_action, sol_action, mr_action, mr_action, urb_action, sol_action, mr_action, rf_action, sp_action, sol_action, sy_action, urb_action, mr_action, sol_action, rf_action, sp_action, sy_action, sol_action, urb_action, mr_action, rf_action, sol_action, sp_action, sy_action, mr_action, urb_action, sol_action, rf_action, sp_action, sy_action, sol_action, mr_action, urb_action, rf_action, sol_action, sp_action, sy_action]
+
+# Building Loop
+for x in range(0,26):
+
+	driver.get('https://utopia.astroempires.com/base.aspx?base=' + base_num + '&view=structures')
+	soup = BeautifulSoup(driver.page_source, 'lxml')
+
+	if build_order[x] == sol:
+		elem = driver.find_elements_by_link_text('Support')[1]
+		elem.click()
+	elif build_order[x] == urb:
+		elem = driver.find_elements_by_link_text('Support')[1]
+		elem.click()
+	else:
+		elem = driver.find_element_by_link_text('Facilities')
+		elem.click()
+
+	# Finding time for build
+	div = soup.find(id=build_order[x])
+	print('build_order: ' + build_order[x])
+	time_wait = div.find(class_='time').get_text()
+	sec_wait = int(time_wait[:-5]) * 60 + int(time_wait[-3:-1])
+	print(time_wait)
+	print(sec_wait)
+
+	### BUILD METAL REFINERY AND WAIT FOR NEXT BUILD ###
+	print('Building address: ' + build_action[x])
+	elem = driver.find_element_by_xpath(build_action[x])
+	elem.click()
+
+	time.sleep(sec_wait+5)
+	driver.refresh()
+	
+
+
+
+### Sending Oliver a message
+#elem = driver.find_element_by_name('body')
+#elem.send_keys('Hey brosky, this message was sent by my program. Its a slow afternoon at work..')
+#elem = driver.find_element_by_xpath("//input[@value='Send']")
+#elem.send_keys('\n')
+
+#driver.close()
+
